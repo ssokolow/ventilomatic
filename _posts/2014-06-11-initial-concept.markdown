@@ -1,3 +1,29 @@
+---
+layout: post
+title:  "Initial Plans"
+date:   2014-06-11 05:43:31
+categories: design
+---
+
+Well, let's get this project started. This has two purposes:
+
+1. First, it's my course project for [COMP444: Embedded/Robotic Programming](http://www.athabascau.ca/syllabi/comp/comp444.php).
+
+2. More satisfyingly, it's also a chance to prototype a mixture of two
+or three ideas that have been rattling around my head and notebook for a while
+now.
+
+   Basically, a mixture of an analytics system and pseudo-HVAC controller for
+   the temperature, humidity, and light levels in my bedroom.
+
+As I don't yet have the skills to truly produce the design I consider suitable
+for permanent installation, this will still have a ways to go, but it should
+replicate the function, if not the form, that I desire.
+
+For records purposes, here is the napkin outline I'll be starting from as a
+direct quote from the e-mail in which I sent it:
+
+```
 1.1. Connect my Arduino Uno, Ethernet Shield, a CdS photoresistor, and
      a "wall wart" power brick.
 1.2. Write a simple sketch which allows the sensor to be queried via
@@ -38,11 +64,14 @@ Controller goals:
 5. If the computer is still in use when the room lighting drops below
    a specified level, turn on a suitable bias light.
 
-(My X10 system already allows me manual control over three light sources, two fans, a door chime, and an X10 universal module (remote 30V DC relay and/or sounder, continuous or momentary) which I have yet to find a use for.)
+(My X10 system already allows me manual control over three light sources,
+two fans, a door chime, and an X10 universal module (remote 30V DC relay
+and/or sounder, continuous or momentary) which I have yet to find a use for.)
 
 Stretch Goals:
 5.1. Write a tool on my desktop PC which feeds in the screensaver
      subsystem's idleness data for information about
      user presence and activity to inform decision-making.
 5.2. Extend the tool to listen to output from the "motion" utility
-     to detect user presence when away from keyboard via the webcam. 
+     to detect user presence when away from keyboard via the webcam.
+```

@@ -158,3 +158,19 @@ a:visited { color: #a0a; }
 .post pre.terminal code {
   background-color: #333;
 }
+
+/*****************************************************************************/
+/*
+/* Site-Specific Customizations
+/*
+/*****************************************************************************/
+
+.url_preview {
+  padding: 1ex;
+  background: white;
+  border: 1px solid gray;
+  border-radius: 1ex;
+  -moz-border-radius: 1ex;
+  -webkit-border-radius: 1ex;
+}
+.url_preview .caption { font-weight: bold; }

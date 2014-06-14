@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>{{ page.title }}</title>
+        <title>{{ page.title }} - {{ site.name }}</title>
         <meta name="viewport" content="width=device-width">
 
         <!-- syntax highlighting CSS -->
@@ -12,13 +12,18 @@
         <!-- Custom CSS -->
         <link rel="stylesheet" href="/css/main.css">
 
+        <script type="text/javascript"
+                src="{{ site.baseurl }}js/jquery-1.11.1.min.js"></script>
+        <script type="text/javascript"
+                src="{{ site.baseurl }}js/imagelink_preview.js"></script>
     </head>
     <body>
 
         <div class="site">
           <div class="header">
-            <h1 class="title"><a href="/">{{ site.name }}</a></h1>
-            <a class="extra" href="/">home</a>
+              <h1 class="title"><a href="{{ site.baseurl }}"
+                      >{{ site.name }}</a></h1>
+              <a class="extra" href="{{ site.baseurl }}">home</a>
           </div>
 
           {{ content }}

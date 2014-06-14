@@ -7,6 +7,8 @@
  *
  * for more info visit http://cssglobe.com/post/1695/easiest-tooltip-and-image-preview-using-jquery
  *
+ * TODO: Fix the `top_val` calculation so it's re-run after initial image load
+ *       resizes the popup.
  */
 
 $(document).ready(function(){

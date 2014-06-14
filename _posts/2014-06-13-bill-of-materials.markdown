@@ -63,7 +63,11 @@ This sensor gets the remaining network-capable components.
 * 1 x [5V magnetic buzzer]({{ site.baseurl }}img/parts/buzzer.jpg) ([$1.5 CDN for 5 or $1.75 CDN for 10](http://www.ebay.ca/sch/i.html?_odkw=photoresistor&_ipg=200&LH_BIN=1&_stpos=L0K+1N0&_sop=15&_localstpos=L0K+1N0&_osacat=0&_from=R40&_mPrRngCbx=1&_trksid=p2045573.m570.l1313.TR10.TRC0.A0.H0.X5v+buzzer&_nkw=5v+buzzer&_sacat=0))
 * 1 x [breadboard hookup wire kit]({{ site.baseurl }}img/parts/hookup_wire.jpg) ([~$3.50 CDN](http://www.ebay.ca/sch/i.html?_odkw=breadboard+wire+kit+-65+-65pcs+-20cm&_sop=15&_osacat=0&_from=R40&_trksid=p2045573.m570.l1313.TR0.TRC0.H0.XU+shape+breadboard+wire+kit&_nkw=U+shape+breadboard+wire+kit&_sacat=0) shared across the whole project)
 * 1 x [9VDC 500mA power supply]({{ site.baseurl }}img/parts/psu_2.jpg)
+* 10 ft. Category 3 telephone wire
 * 1 x [Cat-5 Ethernet patch cable]({{ site.baseurl }}img/parts/cat5_patch.jpg)
+
+The telephone wire is necessary for running the floor humidity and window light
+level sensors off the same node due to a shortage of Ethernet modules.
 
 No standoffs are necessary for this sensor since it will be resting on an
 unfinished wooden surface.
@@ -80,8 +84,14 @@ sensors, this one uses a more precise but more expensive DHT22 instead.
 * 1 x [CdS photoresistor]({{ site.baseurl }}img/parts/cds_cell.jpg) ([5.5¢ ea.](http://www.ebay.ca/sch/i.html?_odkw=dht11&_ipg=200&_stpos=L0K+1N0&LH_BIN=1&_sop=15&_localstpos=L0K+1N0&_osacat=0&clk_rvr_id=524308330579&_mPrRngCbx=1&_trksid=p2045573.m570.l1313.TR0.TRC0.H0.Xphotoresistor&_nkw=photoresistor&_sacat=0&_from=R40) in a 20-pack)
 * 1 x [5V magnetic buzzer]({{ site.baseurl }}img/parts/buzzer.jpg) ([$1.5 CDN for 5 or $1.75 CDN for 10](http://www.ebay.ca/sch/i.html?_odkw=photoresistor&_ipg=200&LH_BIN=1&_stpos=L0K+1N0&_sop=15&_localstpos=L0K+1N0&_osacat=0&_from=R40&_mPrRngCbx=1&_trksid=p2045573.m570.l1313.TR10.TRC0.A0.H0.X5v+buzzer&_nkw=5v+buzzer&_sacat=0))
 * 1 x [breadboard hookup wire kit]({{ site.baseurl }}img/parts/hookup_wire.jpg) ([~$3.50 CDN](http://www.ebay.ca/sch/i.html?_odkw=breadboard+wire+kit+-65+-65pcs+-20cm&_sop=15&_osacat=0&_from=R40&_trksid=p2045573.m570.l1313.TR0.TRC0.H0.XU+shape+breadboard+wire+kit&_nkw=U+shape+breadboard+wire+kit&_sacat=0) shared across the whole project)
+* 1 x Normally open, door-mountable magnetic switch
+* 12 ft. Category 3 telephone wire
 * 1 x [12VDC 1A power supply]({{ site.baseurl }}img/parts/psu_3.jpg)
 * 1 x [Short USB A-to-MiniB cable]({{ site.baseurl }}img/parts/short_usb_mini.jpg)
+
+This sensor node will have the additional task of monitoring whether the door
+needs to be manually opened to allow the fan on X10 channel 4 to have the
+desired effect.
 
 While the power supply isn't strictly necessary, the Raspberry Pi is known for
 having a tendency to corrupt SD cards when supplied with insufficent power and

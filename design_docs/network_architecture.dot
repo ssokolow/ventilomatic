@@ -1,0 +1,55 @@
+digraph network_architecture {
+    size="8,5";
+
+    {
+        rank=same;
+        node_1 [label="Sensors 1"];
+        node_2 [label="Sensors 2"];
+        node_3 [label="Sensors 3"];
+        pc[label="Desktop PC Thermal"];
+    }
+
+    node_1 -> monitor [label="JSON/HTTP"];
+    node_2 -> monitor [label="JSON/HTTP"];
+    node_3 -> usb_bridge [label="USB-Serial"];
+    usb_bridge -> monitor [label="JSON/HTTP"];
+    pc -> monitor [label="JSON/HTTP"];
+
+    subgraph cluster_raspi {
+    color=blue;
+    fontcolor=blue;
+    label = "Raspberry Pi";
+
+
+    monitor -> x10 [label="USB" labelURL="http://m.lemays.org/projects/x10-cm19a-linux-driver"];
+    monitor -> rrdd [label="Shared RRD", labelURL="https://github.com/commx/python-rrdtool"];
+
+    monitor [label="Monitor Process"];
+    usb_bridge [label="Bridge Daemon"];
+    rrdd [label="RRDtool-based Vis."];
+
+    x10 [label="X10 Transceiver"];
+    }
+
+    subgraph cluster_pc {
+    color=blue;
+    fontcolor=blue;
+    label = "Desktop PC";
+
+        webui [label="Web UI"];
+        libnotifyd [label="Desktop Notify Proxy", labelURL="http://www.cmdln.org/2008/12/18/simple-network-popup-with-python-and-libnotify/"];
+    }
+
+    rrdd -> webui [label="HTML/HTTP"];
+    monitor -> libnotifyd [label="JSON/HTTP"];
+
+    light_1 [label="Light"];
+    light_2 [label="Light"];
+    fan_1 [label="Fan"];
+    fan_2 [label="Fan"];
+
+    x10 -> light_1
+    x10 -> light_2
+    x10 -> fan_1
+    x10 -> fan_2
+}

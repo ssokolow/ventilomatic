@@ -40,7 +40,14 @@ void loop() {
   float av_l = analogRead(AP_LDRPIN);
   boolean dv_a = digitalRead(DP_ALARMPIN);
   
-  // Use the DHT's read delay as a timing source
+  // Calculate a simple approximation of the dewpoint
+  // (accurate above 58% humidity) to control the alarm
+  // independently of the master control node.
+  // Source: https://en.wikipedia.org/wiki/Dewpoint
+  float t_dp = t - ((100 - h) / 5);
+  is_alarming = t < t_dp;
+  
+  // Use the DHT's read delay as an alarm timing source
   dv_a = (is_alarming && dv_a == HIGH) ? LOW : HIGH;
   digitalWrite(DP_ALARMPIN, dv_a);
 

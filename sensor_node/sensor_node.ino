@@ -1,6 +1,8 @@
 /*
 
 Hungarian Notation Prefixes:
+- AP: Analog Pin
+- AV: Analog Value (from analogRead)
 - DP: Digtal Pin
 - C: Constant (The value is one of several constants like DHT11)
 
@@ -8,6 +10,7 @@ Hungarian Notation Prefixes:
 
 #include "DHT.h"
 
+#define AP_LDRPIN 0 // Analog pin
 // Temperature sensor configuration
 #define DP_DHTPIN 3
 #define C_DHTTYPE DHT11
@@ -25,6 +28,7 @@ void setup() {
 void loop() {
   float h = dht.readHumidity();
   float t = dht.readTemperature();
+  float av_l = analogRead(AP_LDRPIN);
   
   if (isnan(t) || isnan(h)) {
     Serial.println("Failed to read from DHT");
@@ -34,6 +38,7 @@ void loop() {
     Serial.print(" %\t");
     Serial.print("Temperature: "); 
     Serial.print(t);
-    Serial.println(" *C %\t");
+    Serial.print(" *C %\tLDR: ");
+    Serial.println(av_l);
   }
 }

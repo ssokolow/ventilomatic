@@ -13,7 +13,7 @@ Hungarian Notation Prefixes:
 #include "DHT.h"
 
 #define AP_LDRPIN 0 // Analog pin
-#define DP_ALARMPIN 11
+#define DP_ALARMPIN 10
 
 // Temperature sensor configuration
 #define DP_DHTPIN 3

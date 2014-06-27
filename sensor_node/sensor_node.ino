@@ -31,7 +31,18 @@ void setup() {
   digitalWrite(DP_ALARMPIN, HIGH);
 
   Serial.begin(9600);
-  Serial.println("Connection established");
+}
+
+/** Wrapper for printing all but the first JSON key/value pair */
+void json_print_if(char key[], float val) {
+  Serial.print(", \"");
+  Serial.print(key);
+  Serial.print("\": ");
+  if (isnan(val)) {
+    Serial.print("null");
+  } else {
+    Serial.print(val);
+  }
 }
 
 void loop() {
@@ -51,15 +62,11 @@ void loop() {
   dv_a = (is_alarming && dv_a == HIGH) ? LOW : HIGH;
   digitalWrite(DP_ALARMPIN, dv_a);
 
-  if (isnan(t) || isnan(h)) {
-    Serial.println("Failed to read from DHT");
-  } else {
-    Serial.print("Humidity: "); 
-    Serial.print(h);
-    Serial.print(" %\t");
-    Serial.print("Temperature: "); 
-    Serial.print(t);
-    Serial.print(" *C %\tLDR: ");
-    Serial.println(av_l);
-  }
+  // Output in JSON
+  Serial.print("{ \"api_version\": 0");
+  json_print_if("humidity", h);
+  json_print_if("temperature", t);
+  json_print_if("dewpoint", t_dp);
+  json_print_if("light", av_l);
+  Serial.println(" }");
 }

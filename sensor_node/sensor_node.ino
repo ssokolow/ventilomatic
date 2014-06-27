@@ -3,10 +3,11 @@
 Hungarian Notation Prefixes:
 - AP: Analog Pin
 - AV: Analog Value (from analogRead)
+- C: Constant (The value is one of several constants like DHT11)
 - DP: Digtal Pin
 - DV: Digital Value (from digitalRead)
-- C: Constant (The value is one of several constants like DHT11)
-
+- T: Temperature (Celsius)
+- H: Humidity (Percent)
 */
 
 #include "DHT.h"
@@ -46,27 +47,27 @@ void json_print_if(char key[], float val) {
 }
 
 void loop() {
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
-  float av_l = analogRead(AP_LDRPIN);
-  boolean dv_a = digitalRead(DP_ALARMPIN);
+  float h_relative = dht.readHumidity();
+  float t_ambient = dht.readTemperature();
+  float av_light = analogRead(AP_LDRPIN);
+  boolean dv_alarmpin = digitalRead(DP_ALARMPIN);
   
   // Calculate a simple approximation of the dewpoint
   // (accurate above 58% humidity) to control the alarm
   // independently of the master control node.
   // Source: https://en.wikipedia.org/wiki/Dewpoint
-  float t_dp = t - ((100 - h) / 5);
-  is_alarming = t < t_dp;
+  float t_dewpoint = t_ambient - ((100 - h_relative) / 5);
+  is_alarming = t_ambient < t_dewpoint;
   
   // Use the DHT's read delay as an alarm timing source
-  dv_a = (is_alarming && dv_a == HIGH) ? LOW : HIGH;
-  digitalWrite(DP_ALARMPIN, dv_a);
+  dv_alarmpin = (is_alarming && dv_alarmpin == HIGH) ? LOW : HIGH;
+  digitalWrite(DP_ALARMPIN, dv_alarmpin);
 
   // Output in JSON
   Serial.print("{ \"api_version\": 0");
-  json_print_if("humidity", h);
-  json_print_if("temperature", t);
-  json_print_if("dewpoint", t_dp);
-  json_print_if("light", av_l);
+  json_print_if("humidity", h_relative);
+  json_print_if("temperature", t_ambient);
+  json_print_if("dewpoint", t_dewpoint);
+  json_print_if("light", av_light);
   Serial.println(" }");
 }

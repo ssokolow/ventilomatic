@@ -20,6 +20,7 @@ Hungarian Notation Prefixes:
 - H: Humidity (Percent)
 */
 
+const char NODE_ID[] = "desktop";
 /* --== Configure the hardware ==-- */
 
 #define AP_LDRPIN 0 // Analog pin
@@ -52,6 +53,19 @@ void json_print_if(const char key[], float val) {
     SP_WRITE(val);
   }
 }
+
+/** Wrapper for printing all but the first JSON key/value pair
+    (string values)
+
+    @bug: This does not escape quotes **/
+void json_print_if(const char key[], const char val[]) {
+  SP_WRITE(", \"");
+  SP_WRITE(key);
+  SP_WRITE("\": \"");
+  SP_WRITE(val);
+  SP_WRITE("\"");
+}
+
 /* -- Common code to actually drive the node -- */
 
 #include "DHT.h"
@@ -87,6 +101,7 @@ void loop() {
 
   // Output in JSON
   sp_begin("{ \"api_version\": 0");
+  json_print_if("node_id", NODE_ID);
   json_print_if("humidity", h_relative);
   json_print_if("temperature", t_ambient);
   json_print_if("dewpoint", t_dewpoint);

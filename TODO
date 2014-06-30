@@ -1,4 +1,5 @@
 Look into how wraparound occurs in the Arduino's internal time counter and then implement sequence numbers for my UDP packets.
+Re-architect so that rules are only run when the model changes
 
 http://weather.yahooapis.com/forecastrss?w=4097&u=c
 https://github.com/jcw/ethercard/blob/master/examples/JeeUdp/JeeUdp.ino#L261

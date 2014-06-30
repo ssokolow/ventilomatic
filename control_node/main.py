@@ -22,7 +22,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, see <http://www.gnu.org/licenses/>.
 """
 
-import json, serial, select, socket
+import json, serial, select, socket, time
 import logging, pprint
 log = logging.getLogger(__name__)
 
@@ -35,6 +35,7 @@ __license__ = "GNU GPL 2 or later"
 
 SERIAL_INPUTS = ['/dev/ttyUSB0']
 UDP_ADDR = ('0.0.0.0', 51199)
+WARMUP_TIME = 3
 
 inputs = []
 for path in SERIAL_INPUTS:
@@ -48,7 +49,6 @@ if UDP_ADDR:
     inputs.append(sock)
 
 class Monitor(object):
-
     """Application for keeping track of sensor state."""
 
     def __init__(self, inputs):
@@ -58,6 +58,7 @@ class Monitor(object):
         self._inputs = inputs
         self._buffers = {}
         self._model = {}
+        self.last_rule_eval = None
 
     def defragment_input(self, handle):
         """Given a readable socket, move data to the accumulation buffers.
@@ -100,6 +101,7 @@ class Monitor(object):
                     log.error('Packet had unsupported API version \"%s\": %s',
                               api_version, data)
 
+                log.debug(data)
                 messages.append(data)
         return messages
 
@@ -115,6 +117,10 @@ class Monitor(object):
 
     def loop_iteration(self):
         """Perform one iteration of the main loop"""
+        # Give data time to come in before letting rules complain
+        if self.last_rule_eval is None:
+            self.last_rule_eval = time.time() + WARMUP_TIME
+
         readable, _, errored = select.select(self._inputs, [], self._inputs)
         for sck in readable:
             self.defragment_input(sck)
@@ -122,10 +128,10 @@ class Monitor(object):
         for message in self.parse_buffers():
             self.update_model(message)
 
-        #TODO: This won't scale well and should be redesigned
-        log.debug(pprint.pformat(self._model))
-        for rule in RULES:
-            rule(self._model)
+        # Only run rules once per second at most
+        if (time.time() - self.last_rule_eval) > 1:
+            for rule in RULES:
+                rule(self._model)
 
     def run(self):
         while self._inputs:

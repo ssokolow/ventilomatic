@@ -7,10 +7,37 @@
 __author__ = "Stephan Sokolow (deitarion/SSokolow)"
 __license__ = "GNU GPL 2 or later"
 
-import logging
+import logging, time
 log = logging.getLogger(__name__)
 
-from actions import call_x10
+from actions import call_x10, get_yahoo_weather, notify_user
+
+class CheckExternalTemperature(object):
+    """Use Yahoo! Weather to get the external temperature and use libnotify
+    to fire off a notification if it's possible to approach a target
+    temperature by opening the window.
+    """
+    min_interval = 30  # Minutes
+
+    def __init__(self, sensor_id, target_temp, woeid):
+        self.sensor_id = sensor_id
+        self.target_temp = target_temp
+        self.woeid = woeid
+        self.last_notified = 0
+
+    def __call__(self, model):
+        now = time.time()
+        if (now - self.last_notified) < (self.min_interval * 60):
+            return
+        else:
+            self.last_notified = now
+
+        int_temp = model.get(self.sensor_id, {}).get('temperature')
+        ext_temp = get_yahoo_weather(self.woeid).condition.temperature
+
+        if abs(int_temp - self.target_temp) > abs(ext_temp - self.target_temp):
+            notify_user("Open the window",
+                        "It's more comfortable outside")
 
 class WasteNoLight(object):
     """Turn off specified room lights when a specified sensor detects too
@@ -60,5 +87,6 @@ class NoDampCorners(object):
 
 RULES = [
     WasteNoLight('corner', [1, 2, 6]),
-    NoDampCorners('desktop', 'corner', 3)
+    NoDampCorners('desktop', 'corner', 3),
+    CheckExternalTemperature('desktop', 20, 4097)
 ]

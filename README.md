@@ -13,3 +13,5 @@ details.
 * [pySerial](http://pyserial.sourceforge.net/) (Will be made optional later)
 * [Weatherpy](https://github.com/cmcdowell/weatherpy) (Will be made optional
   later)
+* [BottleRocket](http://www.linuxha.com/bottlerocket/) (For X10 control)
+* [`libnotify`](http://www.galago-project.org/news/index.php) (For `notify-send`)

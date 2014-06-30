@@ -18,6 +18,9 @@
                 src="{{ site.baseurl }}js/imagelink_preview.js"></script>
     </head>
     <body>
+        {% if site.github.repository_url %}
+          <div class="ribbon"><a href="{{ site.github.repository_url }}"><img src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a></div>
+        {% endif %}
 
         <div class="site">
           <div class="header">

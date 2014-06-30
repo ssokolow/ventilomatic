@@ -1,4 +1,13 @@
-/*
+/* Sensor Node for Ventilomatic
+By: Stephan Sokolow
+
+License: GNU GPL 2.0 or later
+
+Note: You are expected to already have one or both of the following
+      libraries installed in your Arduino IDE, depending on the
+      hardware you intend to program with this sketch:
+- https://github.com/adafruit/DHT-sensor-library
+- https://github.com/jcw/ethercard
 
 Hungarian Notation Prefixes:
 - AP: Analog Pin

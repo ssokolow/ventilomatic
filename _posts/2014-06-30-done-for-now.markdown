@@ -10,6 +10,8 @@ I have some stuff to finish up in another course, so I seriously doubt I'll be a
 
 Given the time-crunch, I definitely had to make some compromises. (For example, I'm currently running the control node on my desktop PC because it already has the CM17A set up for sending X10 messages but I used that as a blocking operation. While fast reactions may not be essential in this application, I'll still want to switch to an asynchronous design if for no other reason than making absolutely sure it's impossible for the UDP receive buffers to overflow and start losing measurements I want to log and graph.)
 
+I also noticed that the voltage regulator on my Arduino Uno is dissipating a lot more heat than would seem reasonable when powered by [my 9V supply]({{ site.baseurl }}/img/parts/psu_2.jpg) so that's something else I'll have to investigate before producing versions for permanent installation.
+
 
 ### Controller Goal #1: DONE
 *Turn the lights off when the sunlight becomes bright enough to

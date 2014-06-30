@@ -23,64 +23,69 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 __appname__ = "Ventilomatic Control Node"
 __author__ = "Stephan Sokolow (deitarion/SSokolow)"
-__version__ = "0.1"
+__version__ = "0.2"
 __license__ = "GNU GPL 2 or later"
 
 SERIAL_INPUTS = ['/dev/ttyUSB0']
+UDP_ADDR = ('0.0.0.0', 51199)
 CM17A_PORT = '/dev/ttyS0'
 
-import json, serial, subprocess, urwid
+import json, serial, select, socket, subprocess
 
-inputs = {}
+inputs, buffers = [], {}
 for path in SERIAL_INPUTS:
     fobj = serial.Serial(path, 9600)
-    inputs[fobj.fileno()] = fobj
+    inputs.append(fobj)
 
-call_x10 = lambda device, state: subprocess.call(['br', '-x', CM17A_PORT,
-    "A%d" % device, 'on' if state else 'off'])
+if UDP_ADDR:
+    # TODO: Decide how best to handle IPv6
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(UDP_ADDR)
+    inputs.append(sock)
 
-class Monitor(object):
-    palette = [
-        (None, 'light gray', 'black', ''),
-    ]
+def call_x10(device, state):
+    """API abstraction wrapper for sending X10 commands
 
-    def __init__(self, ports):
-        self.ports = ports
-        self.pending_data = {x: '' for x in self.ports}
-        self.widgets = {x: urwid.Text('') for x in self.ports}
+    @param device: An X10 device code from 1 to 16
+    @param state: The target state for the device
 
-        row = urwid.Pile(list(('pack', w) for w in self.widgets.values()))
-        fill = urwid.Filler(row)
+    @type device: C{int}
+    @type state: C{bool}
+    """
+    subprocess.call(['br', '-x', CM17A_PORT, "A%d" % device,
+                     'on' if state else 'off'])
 
-        self.loop = urwid.MainLoop(fill, self.palette,
-                unhandled_input=self.exit_on_q)
-        for fno in self.ports:
-            self.loop.event_loop.watch_file(fno, self.data_ready_cb)
+while inputs:
+    readable, _, errored = select.select(inputs, [], inputs)
+    for sck in readable:
+        fno = sck.fileno()
+        if hasattr(sck, 'readable') and hasattr(sck, 'inWaiting'):
+            key = fno
+            buffers.setdefault(key, '')
+            buffers[fno] += sck.read(sck.inWaiting())
+        elif hasattr(sck, 'recvfrom'):
+            data, addr = sck.recvfrom(1024)
+            key = (fno, addr)
+            buffers.setdefault(key, '')
+            buffers[key] += data
+        else:
+            print "ERROR: Unknown type of data source encountered!"
 
-    def data_ready_cb(self):
-        for fno, port in self.ports.items():
-            while (port.readable() and
-                   not '\r\n' in self.pending_data[fno]):
-                self.pending_data[fno] += port.read(port.inWaiting())
+    for key in buffers:
+        while '\n' in buffers[key]:
+            raw, buffers[key] = (buffers[key].replace('\r', '').split('\n', 1))
+            if not raw:
+                continue
 
-            while '\r\n' in self.pending_data[fno]:
-                raw, self.pending_data[fno] = (
-                    self.pending_data[fno].split('\r\n', 1))
+            try:
+                data = json.loads(raw)
+            except ValueError:
+                print "Packet was not valid JSON: %r" % raw
+                continue
 
-                try:
-                    data = json.loads(raw)
-                except ValueError:
-                    print "Packet was not valid JSON: %s" % raw
-                    continue
+            api_version = data.get('api_version', None)
+            if not api_version == 0:
+                print 'Packet had unsupported API version \"%s\": %s' % (
+                    api_version, data)
 
-                self.widgets[fno].set_text((None, repr(data)))
-
-    def exit_on_q(self, key):
-        if key in ('q', 'Q'):
-            raise urwid.ExitMainLoop()
-
-    def run(self):
-        self.loop.run()
-
-app = Monitor(inputs)
-app.run()
+            print repr(data)

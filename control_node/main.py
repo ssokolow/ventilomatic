@@ -1,6 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """Ventilomatic Control Node Program
+--snip--
 
 Requires:
 - PySerial
@@ -21,6 +22,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, see <http://www.gnu.org/licenses/>.
 """
 
+import json, serial, select, socket
+import logging, pprint
+log = logging.getLogger(__name__)
+
 __appname__ = "Ventilomatic Control Node"
 __author__ = "Stephan Sokolow (deitarion/SSokolow)"
 __version__ = "0.2"
@@ -28,11 +33,8 @@ __license__ = "GNU GPL 2 or later"
 
 SERIAL_INPUTS = ['/dev/ttyUSB0']
 UDP_ADDR = ('0.0.0.0', 51199)
-CM17A_PORT = '/dev/ttyS0'
 
-import json, serial, select, socket, subprocess
-
-inputs, buffers = [], {}
+inputs = []
 for path in SERIAL_INPUTS:
     fobj = serial.Serial(path, 9600)
     inputs.append(fobj)
@@ -43,49 +45,111 @@ if UDP_ADDR:
     sock.bind(UDP_ADDR)
     inputs.append(sock)
 
-def call_x10(device, state):
-    """API abstraction wrapper for sending X10 commands
+class Monitor(object):
 
-    @param device: An X10 device code from 1 to 16
-    @param state: The target state for the device
+    """Application for keeping track of sensor state."""
 
-    @type device: C{int}
-    @type state: C{bool}
-    """
-    subprocess.call(['br', '-x', CM17A_PORT, "A%d" % device,
-                     'on' if state else 'off'])
+    def __init__(self, inputs):
+        """
+        :inputs: A list of `select()`able objects.
+        """
+        self._inputs = inputs
+        self._buffers = {}
+        self._model = {}
 
-while inputs:
-    readable, _, errored = select.select(inputs, [], inputs)
-    for sck in readable:
-        fno = sck.fileno()
-        if hasattr(sck, 'readable') and hasattr(sck, 'inWaiting'):
+    def defragment_input(self, handle):
+        """Given a readable socket, move data to the accumulation buffers.
+
+        :handle: A readable object as returned by select()
+        """
+        fno = handle.fileno()
+        if hasattr(handle, 'readable') and hasattr(handle, 'inWaiting'):
             key = fno
-            buffers.setdefault(key, '')
-            buffers[fno] += sck.read(sck.inWaiting())
-        elif hasattr(sck, 'recvfrom'):
-            data, addr = sck.recvfrom(1024)
+            self._buffers.setdefault(key, '')
+            self._buffers[fno] += handle.read(handle.inWaiting())
+        elif hasattr(handle, 'recvfrom'):
+            data, addr = handle.recvfrom(1024)
             key = (fno, addr)
-            buffers.setdefault(key, '')
-            buffers[key] += data
+            self._buffers.setdefault(key, '')
+            self._buffers[key] += data
         else:
-            print "ERROR: Unknown type of data source encountered!"
+            log.error("Unknown type of data source encountered!")
 
-    for key in buffers:
-        while '\n' in buffers[key]:
-            raw, buffers[key] = (buffers[key].replace('\r', '').split('\n', 1))
-            if not raw:
-                continue
+    def parse_buffers(self):
+        """Extract any complete messages from the accumulation buffers and
+        parse them."""
 
-            try:
-                data = json.loads(raw)
-            except ValueError:
-                print "Packet was not valid JSON: %r" % raw
-                continue
+        messages = []
+        for key in self._buffers:
+            while '\n' in self._buffers[key]:
+                raw, self._buffers[key] = self._buffers[key].replace('\r',
+                                                         '').split('\n', 1)
+                if not raw:
+                    continue
 
-            api_version = data.get('api_version', None)
-            if not api_version == 0:
-                print 'Packet had unsupported API version \"%s\": %s' % (
-                    api_version, data)
+                try:
+                    data = json.loads(raw)
+                except ValueError:
+                    log.debug("Packet was not valid JSON: %r", raw)
+                    continue
 
-            print repr(data)
+                api_version = data.get('api_version', None)
+                if not api_version == 0:
+                    log.error('Packet had unsupported API version \"%s\": %s',
+                              api_version, data)
+
+                messages.append(data)
+        return messages
+
+    def update_model(self, message):
+        """Update our model of the world"""
+        node_id = message.get('node_id', None)
+        if not node_id:
+            log.error("Message has no node ID: %s" % message)
+            return
+
+        #XXX: On which layer should further format validation happen?
+        self._model[node_id] = message
+
+    def loop_iteration(self):
+        """Perform one iteration of the main loop"""
+        readable, _, errored = select.select(self._inputs, [], self._inputs)
+        for sck in readable:
+            self.defragment_input(sck)
+
+        for message in self.parse_buffers():
+            self.update_model(message)
+
+        #TODO: This won't scale well and should be redesigned
+        log.debug(pprint.pformat(self._model))
+
+    def run(self):
+        while self._inputs:
+            self.loop_iteration()
+
+if __name__ == '__main__':
+    from optparse import OptionParser
+    parser = OptionParser(version="%%prog v%s" % __version__,
+            usage="%prog [options] <argument> ...",
+            description=__doc__.replace('\r\n', '\n').split('\n--snip--\n')[0])
+    parser.add_option('-v', '--verbose', action="count", dest="verbose",
+        default=2, help="Increase the verbosity. Use twice for extra effect")
+    parser.add_option('-q', '--quiet', action="count", dest="quiet",
+        default=0, help="Decrease the verbosity. Use twice for extra effect")
+    # Reminder: %default can be used in help strings.
+
+    # Allow pre-formatted descriptions
+    parser.formatter.format_description = lambda description: description
+
+    opts, args = parser.parse_args()
+
+    # Set up clean logging to stderr
+    log_levels = [logging.CRITICAL, logging.ERROR, logging.WARNING,
+                  logging.INFO, logging.DEBUG]
+    opts.verbose = min(opts.verbose - opts.quiet, len(log_levels) - 1)
+    opts.verbose = max(opts.verbose, 0)
+    logging.basicConfig(level=log_levels[opts.verbose],
+                        format='%(levelname)s: %(message)s')
+
+    app = Monitor(inputs)
+    app.run()

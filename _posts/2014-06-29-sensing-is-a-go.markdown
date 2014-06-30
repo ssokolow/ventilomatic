@@ -19,6 +19,20 @@ Well, a lack of time has necessitated some corner-cutting, but basic network sup
 
 (Eagle-eyed readers may notice that's not valid JSON. It's Python `repr()` debugging output which indicates that `main.py` successfully received, defragmented, and parsed valid JSON, then confirmed the correct value for the `api_version` field.)
 
+Arduino coders who've worked with the WizNet Ethernet shield before may also notice that I'm not using the SD card library yet the shield remains reliable. For anyone who's wondering, the answer is to explcitly disable the SD card reader so it doesn't confuse the SPI bus by trying to talk at the same time as the Ethernet chip.
+
+```c++
+    // Source: http://forum.freetronics.com/viewtopic.php?f=4&t=176&start=50
+    pinMode(53, OUTPUT);   // set the SS pin as an output (necessary on Mega2560?)
+    digitalWrite(53, LOW); // ? (not sure)
+    pinMode(4,  OUTPUT);   // SD select pin             (required)
+    digitalWrite(4, HIGH); // Explicitly disable SD     (required)
+    pinMode(10, OUTPUT);   // Ethernet select pin       (optional?)
+    digitalWrite(10, LOW); // Explicitly enable Network (optional?)
+```
+
+The same principle applies in reverse if you want to use the SD card without the Ethernet. (If you're using both, the libraries handle everything for you)
+
 ### Caveats
 
 At the moment, the sensors still have a single point of failure in that their communication is a blocking operation, so a dead serial or network link will prevent the internal alarm from going off. I doubt I'll have time to fix that before my course contract date so the dewpoint alarm will have to be purely for alerting when the network or serial link is up but there's a failure between `main.py` and whatever notification GUI I've configured.

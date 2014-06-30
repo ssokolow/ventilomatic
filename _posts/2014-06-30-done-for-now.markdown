@@ -2,6 +2,7 @@
 layout: post
 title:  "Done (For Now)"
 date:   2014-06-30 03:45:00
+categories: status
 ---
 I have some stuff to finish up in another course, so I seriously doubt I'll be able to work on this any more before the end of today. As such, this is the final state the project will take before my course deadline.
 

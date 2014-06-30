@@ -15,11 +15,12 @@ Hungarian Notation Prefixes:
 - C: Constant (The value is one of several constants like DHT11)
 - DP: Digtal Pin
 - DV: Digital Value (from digitalRead)
+- SP: Status Packet (Serial, UDP, etc.)
 - T: Temperature (Celsius)
 - H: Humidity (Percent)
 */
 
-#include "DHT.h"
+/* --== Configure the hardware ==-- */
 
 #define AP_LDRPIN 0 // Analog pin
 #define DP_ALARMPIN 8
@@ -29,10 +30,32 @@ Hungarian Notation Prefixes:
 #define C_DHTTYPE DHT11
 //#define C_DHTTYPE DHT22
 
-DHT dht(DP_DHTPIN, C_DHTTYPE);
+/* --== Main Program Starts Here ==-- */
 
-// -- For now, build on code from AdaFruit's DHTtester sketch to
-//    make sure I've wired everything correctly.
+/* -- Code to abstract away communications -- */
+// Define Serial writing routines
+#define SP_WRITE(x) Serial.print(x)
+void sp_begin(char header[]) { SP_WRITE(header); }
+void sp_end(char footer[]) { Serial.println(footer); }
+/* -- Code for generating status packets -- */
+
+/** Wrapper for printing all but the first JSON key/value pair
+    (floating point values) */
+void json_print_if(const char key[], float val) {
+  SP_WRITE(", \"");
+  SP_WRITE(key);
+  SP_WRITE("\": ");
+  if (isnan(val)) {
+    SP_WRITE("null");
+  } else {
+
+    SP_WRITE(val);
+  }
+}
+/* -- Common code to actually drive the node -- */
+
+#include "DHT.h"
+DHT dht(DP_DHTPIN, C_DHTTYPE);
 
 boolean is_alarming = 0;
 
@@ -41,17 +64,7 @@ void setup() {
   digitalWrite(DP_ALARMPIN, HIGH);
 
   Serial.begin(9600);
-}
 
-/** Wrapper for printing all but the first JSON key/value pair */
-void json_print_if(char key[], float val) {
-  Serial.print(", \"");
-  Serial.print(key);
-  Serial.print("\": ");
-  if (isnan(val)) {
-    Serial.print("null");
-  } else {
-    Serial.print(val);
   }
 }
 
@@ -73,10 +86,10 @@ void loop() {
   digitalWrite(DP_ALARMPIN, dv_alarmpin);
 
   // Output in JSON
-  Serial.print("{ \"api_version\": 0");
+  sp_begin("{ \"api_version\": 0");
   json_print_if("humidity", h_relative);
   json_print_if("temperature", t_ambient);
   json_print_if("dewpoint", t_dewpoint);
   json_print_if("light", av_light);
-  Serial.println(" }");
+  sp_end(" }");
 }

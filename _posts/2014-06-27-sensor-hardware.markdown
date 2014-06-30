@@ -7,13 +7,15 @@ categories: design hardware
 
 Sorry for the wait (life got **very** distracting and stressful), but here we are. The sensor nodes are done and the Fritzing schematic is in the repository.
 
+**Update:** Incomplete documentation led me to incorrectly believe Pin 10 was free when using the Arduino Ethernet shield. I've relocated the buzzer to pin 8 and updated both the photos and Fritzing files. The originals are available via the git history.
+
 Here are the three different prototype sensor designs:
 
 ![Arduino Uno + Ethernet Shield]({{ site.baseurl }}img/assembled/uno_node.jpg)
 ![Arduino Leonardo + EtherCard]({{ site.baseurl }}img/assembled/leonardo_node.jpg)
 ![Sparkfun RedBoard]({{ site.baseurl }}img/assembled/redboard_node.jpg)
 
-They all look quite different but, aside from the method of communication (Ethernet shield, EtherCard, and USB serial), they all follow this exact same schematic (Fritzing source files available in the repository, though the non-Breadboard views are a bit of a mess because the DHT22 part for Fritzing is a bit broken for non-Breadboard views):
+They all look quite different but, aside from the method of communication (Ethernet shield, EtherCard, and USB serial), they all follow this exact same schematic (Fritzing source files available in the repository, though the non-Breadboard views are a bit of a mess because the DHT22 part for Fritzing is a bit broken):
 
 ![Fritzing Breadboard View]({{ site.baseurl }}img/assembled/sensor_node_bb.png)
 

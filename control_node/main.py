@@ -26,6 +26,8 @@ import json, serial, select, socket
 import logging, pprint
 log = logging.getLogger(__name__)
 
+from rules import RULES
+
 __appname__ = "Ventilomatic Control Node"
 __author__ = "Stephan Sokolow (deitarion/SSokolow)"
 __version__ = "0.2"
@@ -122,6 +124,8 @@ class Monitor(object):
 
         #TODO: This won't scale well and should be redesigned
         log.debug(pprint.pformat(self._model))
+        for rule in RULES:
+            rule(self._model)
 
     def run(self):
         while self._inputs:

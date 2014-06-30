@@ -27,6 +27,8 @@ I haven't yet written the network code, but the draft code for version 1 of the 
 { "api_version": 0, "humidity": 56.20, "temperature": 25.10, "dewpoint": 16.34, "light": 295.00 }
 ```
 
+**Update:** See [Sensing Is A Go]({{ site.baseurl}}{% post_url 2014-06-29-sensing-is-a-go %}) for the updated form the JSON messages take.
+
 Two tips for working on this sort of project:
 
 1. Work with familiar hardware. I don't know what it was, but the Redboard was giving me trouble at first and it was a lot easier to iron out the design and code on my old reliable Arduino Uno (the tallest node pictured), then assemble the design on the Redboard once I was sure that any issues wouldn't be software bugs.

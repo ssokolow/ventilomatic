@@ -3,3 +3,5 @@ Re-architect so that rules are only run when the model changes
 
 http://weather.yahooapis.com/forecastrss?w=4097&u=c
 https://github.com/jcw/ethercard/blob/master/examples/JeeUdp/JeeUdp.ino#L261
+https://wiki.python.org/moin/UdpCommunication
+http://scotdoyle.com/python-epoll-howto.html

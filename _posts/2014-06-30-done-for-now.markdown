@@ -12,6 +12,7 @@ Given the time-crunch, I definitely had to make some compromises. (For example, 
 
 I also noticed that the voltage regulator on my Arduino Uno is dissipating a lot more heat than would seem reasonable when powered by [my 9V supply]({{ site.baseurl }}/img/parts/psu_2.jpg) so that's something else I'll have to investigate before producing versions for permanent installation.
 
+However, given my goals, the obstacles I faced, and the time I had, I think I did pretty well for a first sprint. Here is an overview of the status of the "end result" goals as of my course's contract date:
 
 ### Controller Goal #1: DONE
 *Turn the lights off when the sunlight becomes bright enough to

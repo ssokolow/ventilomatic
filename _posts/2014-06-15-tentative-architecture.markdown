@@ -9,6 +9,8 @@ Here is my first draft for how information will flow in the system's network-tra
 (I'll fix the bad kerning once I have a build scripting system in place to make
 use of the more complicated commands needed.)
 
+**Update:** At present, due to time constraints, I've had to go for **push-based design** with raw **newline-terminated JSON packets over UDP**. I still hope to switch to a pull-based HTTP design in the future.
+
 ![Graph Diagram]({{ site.baseurl }}/design_docs/network_architecture.dot.png)
 [[source]({{ site.baseurl}}/design_docs/network_architecture.dot)]
 

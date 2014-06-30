@@ -20,7 +20,27 @@ Hungarian Notation Prefixes:
 - H: Humidity (Percent)
 */
 
+/* --== Select how the node will report to the master ==-- */
+#define SERIAL 0     // Built-in USB-Serial bridge
+#define ETHERNET 1   // WizNet Ethernet Shield
+
+#define MODE SERIAL
+//#define MODE ETHERNET
+
+/* --== Configure network communication ==-- */
+
+// These must be different for each node
+//const char NODE_ID[] = "corner";
+//byte MAC_ADDR[] = { 0xDF, 0x5E, 0x64, 0xD1, 0x8F, 0xBA };
+//const char NODE_ID[] = "family_room";
+//byte MAC_ADDR[] = { 0xDF, 0x5E, 0x64, 0xD1, 0x8F, 0xBB };
 const char NODE_ID[] = "desktop";
+byte MAC_ADDR[] = { 0xDF, 0x5E, 0x64, 0xD1, 0x8F, 0xBC };
+
+// This must be the same for all nodes
+const byte MASTER_NODE[] = { 192, 168, 0, 2 };
+const unsigned short UDP_PORT = 51199;
+
 /* --== Configure the hardware ==-- */
 
 #define AP_LDRPIN 0 // Analog pin
@@ -35,9 +55,37 @@ const char NODE_ID[] = "desktop";
 
 /* -- Code to abstract away communications -- */
 // Define Serial writing routines
+#if MODE == SERIAL
 #define SP_WRITE(x) Serial.print(x)
 void sp_begin(char header[]) { SP_WRITE(header); }
 void sp_end(char footer[]) { Serial.println(footer); }
+
+// Import WizNet library and define writing routines
+#elif MODE == ETHERNET
+#include <SPI.h>         // needed for Arduino versions later than 0018
+#include <Ethernet.h>
+#include <EthernetUdp.h>         // UDP library from: bjoern@cs.stanford.edu 12/30/2008
+
+EthernetUDP udp;
+const IPAddress IP_MASTER_NODE(MASTER_NODE[0], MASTER_NODE[1],
+                               MASTER_NODE[2], MASTER_NODE[3]);
+
+#define SP_WRITE(x) udp.print(x)
+void sp_begin(char header[]) {
+  // TODO: Will anything bad happen if I don't do this and the
+  //       receive buffer fills up?
+  udp.parsePacket();
+
+  udp.beginPacket(IP_MASTER_NODE, UDP_PORT);
+  SP_WRITE(header);
+}
+void sp_end(char footer[]) {
+  SP_WRITE(footer);
+  SP_WRITE("\n");
+  udp.endPacket();
+}
+#endif
+
 /* -- Code for generating status packets -- */
 
 /** Wrapper for printing all but the first JSON key/value pair
@@ -77,9 +125,23 @@ void setup() {
   pinMode(DP_ALARMPIN, OUTPUT);
   digitalWrite(DP_ALARMPIN, HIGH);
 
+#if MODE == SERIAL
   Serial.begin(9600);
+#elif MODE == ETHERNET
+  // Make the Ethernet shield reliable without the SD card library
+  pinMode(4,  OUTPUT);   // SD select pin             (required)
+  digitalWrite(4, HIGH); // Explicitly disable SD     (required)
 
+  while (Ethernet.begin(MAC_ADDR) == 0) {
+    // ...if DHCP request failed, wait one minute, then retry
+    delay(1000 * 60);
   }
+
+  // Needed even if we don't intend to receive any packets
+  udp.begin(UDP_PORT);
+#else
+#error Unrecognized Communication Mode
+#endif
 }
 
 void loop() {

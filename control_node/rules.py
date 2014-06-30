@@ -23,10 +23,7 @@ class WasteNoLight(object):
     def __call__(self, model):
         corner_brightness = model.get('corner', {}).get('light', 0)
         if corner_brightness > 750:
-            # Send each message twice to account for X10 bus noise
-            for dev in self.lights:
-                for _ in range(2):
-                    call_x10(dev, False)
+            call_x10(self.lights, False)
 
 RULES = [
     WasteNoLight('corner', [1, 2, 6])

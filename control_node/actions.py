@@ -5,7 +5,10 @@ __license__ = "GNU GPL 2 or later"
 
 CM17A_PORT = '/dev/ttyS0'
 
-import subprocess
+import datetime, subprocess
+import weatherpy
+
+weather_cache = None
 
 def call_x10(device, state, house_code='A', noisy=True):
     """API abstraction wrapper for sending X10 commands
@@ -26,3 +29,17 @@ def call_x10(device, state, house_code='A', noisy=True):
                          '-r', str(1 + noisy),
                          "%s%d" % (house_code, dev),
                          'on' if state else 'off'])
+
+def get_yahoo_weather(woeid, cache_duration=60):
+    global weather_cache
+    if weather_cache and ((
+        datetime.datetime.now() - weather_cache.condition.date
+    ).seconds / 60.0) < cache_duration:
+        return weather_cache
+
+    weather_cache = weatherpy.Response(
+        'Ventilomatic +http://ssokolow.com/ventilomatic/', woeid)
+    return weather_cache
+
+def notify_user(title, body):
+    subprocess.call(['notify-send', title, body])

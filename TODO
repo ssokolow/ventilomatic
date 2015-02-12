@@ -5,3 +5,6 @@ http://weather.yahooapis.com/forecastrss?w=4097&u=c
 https://github.com/jcw/ethercard/blob/master/examples/JeeUdp/JeeUdp.ino#L261
 https://wiki.python.org/moin/UdpCommunication
 http://scotdoyle.com/python-epoll-howto.html
+
+Look into whether integrating with openHAB could simplify my own code
+https://lwn.net/Articles/631827/
